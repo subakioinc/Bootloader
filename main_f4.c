@@ -713,6 +713,7 @@ main(void)
 	bool try_boot = true;			/* try booting before we drop to the bootloader */
 	unsigned timeout = BOOTLOADER_DELAY;	/* if nonzero, drop out of the bootloader after this time */
 
+	// FP 명령을 수행 전에 FPU를 활성화
 	/* Enable the FPU before we hit any FP instructions */
 	SCB_CPACR |= ((3UL << 10 * 2) | (3UL << 11 * 2)); /* set CP10 Full Access and set CP11 Full Access */
 
@@ -729,23 +730,28 @@ main(void)
 
 #endif
 
+	// 보드 관련 초기화
 	/* do board-specific initialisation */
 	board_init();
 
+	// bootloader 동작에 대한 clock 설정
 	/* configure the clock for bootloader activity */
 	clock_init();
 
+	// 강제 부트로더 register 검사, signature가 있는 경우 booting 시도하지 않기
 	/*
 	 * Check the force-bootloader register; if we find the signature there, don't
 	 * try booting.
 	 */
 	if (board_get_rtc_signature() == BOOT_RTC_SIGNATURE) {
 
+		// bootloader로 빠지기 전에 boot 시도 하지마라
 		/*
 		 * Don't even try to boot before dropping to the bootloader.
 		 */
 		try_boot = false;
 
+		// 뭔가 upload될때까지 bootloader를 빠져나오지 않게
 		/*
 		 * Don't drop out of the bootloader until something has been uploaded.
 		 */
@@ -760,6 +766,8 @@ main(void)
 
 #ifdef BOOT_DELAY_ADDRESS
 	{
+		// boot delay signature가 있으면 최소한 해당 시간만큼 boot를 연기
+		// 컴퓨터가 새로운 firmware를 load하기 기회를 갖고, BOOT 명령을 보내서 빠르게 booting
 		/*
 		  if a boot delay signature is present then delay the boot
 		  by at least that amount of time in seconds. This allows
@@ -785,6 +793,7 @@ main(void)
 	}
 #endif
 
+	// force-bootloader 핀이 눌려져 있으면 booting 안하기
 	/*
 	 * Check if the force-bootloader pins are strapped; if strapped,
 	 * don't try booting.
