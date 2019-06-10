@@ -23,6 +23,9 @@ static struct {
 	uint32_t	size;
 } flash_sectors[] = {
 
+	// 물리적 FLASH 섹터 0은 bootloader로 사용
+	// N 섹터는 app fw용으로 예약
+	// 
 	/* Physical FLASH sector 0 is reserved for bootloader and is not
 	 * the table below.
 	 * N sectors may aslo be reserved for the app fw in which case
@@ -103,6 +106,7 @@ typedef struct mcu_des_t {
 	char  rev;
 } mcu_des_t;
 
+// UNKNOWN CPU ID는 0.
 // The default CPU ID  of STM32_UNKNOWN is 0 and is in offset 0
 // Before a rev is known it is set to ?
 // There for new silicon will result in STM32F4..,?
@@ -118,6 +122,7 @@ typedef struct mcu_rev_t {
 	char  rev;
 } mcu_rev_t;
 
+// 이 테이블은 2가지 방식으로 사용. 해당 chip의 revison을 살펴보기,  
 /*
  * This table is used in 2 ways. One to look look up the revision
  * of a given chip. Two to see it a revsion is in the group of "Bad"
@@ -351,6 +356,8 @@ board_get_devices(void)
 static void
 board_init(void)
 {
+	// 최대 firmware 크기 고정
+	// 이를 얻기 우해서 메모리를 읽어야만 함.
 	/* fix up the max firmware size, we have to read memory to get this */
 	board_info.fw_size = APP_SIZE_MAX;
 #if defined(TARGET_HW_PX4_FMU_V2) || defined(TARGET_HW_PX4_FMU_V3) || defined(TARGET_HW_PX4_FMU_V4)
